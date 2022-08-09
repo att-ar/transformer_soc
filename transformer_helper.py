@@ -20,7 +20,6 @@ def get_angles(pos, k, d: int):
     i = k // 2
     # Calculate the angles using pos, i and d
     angles = pos / (10000 ** (2 * i / d))
-    # END CODE HERE
 
     return angles
 
@@ -59,7 +58,7 @@ def positional_encoding(positions: int, d: int):
 def create_padding_mask(decoder_token_ids):
     """
     Creates a matrix mask for the padding cells
-    replaces zeros with negative infinities to not cause problems when applying softmax
+    Still need to replace zeros with negative infinities to not cause problems when applying softmax
 
     Arguments:
         decoder_token_ids -- (n, m) matrix
@@ -70,10 +69,8 @@ def create_padding_mask(decoder_token_ids):
     seq = 1 - tf.cast(tf.math.equal(decoder_token_ids, 0), tf.float32)
     # tf.math.equal(x,y) Returns the truth value of (x == y) element-wise.
     # True has numerical value 1, False 0 so all the zeros turn into 1 here, and everything else becomes 0
-
-    # add extra dimensions to add the padding to the attention logits.
-
-    return seq[:, tf.newaxis, :]
+    
+    return seq
 
 
 def create_look_ahead_mask(sequence_length):
