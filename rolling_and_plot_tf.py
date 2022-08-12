@@ -387,7 +387,7 @@ def validate(model, dataloader, dev=True):
                     y_title="SOC",
                     title="Predicted vs Actual SOC",
                     name=[["predictions", "labels"]],
-                    mode=[["markers", "markers"]],
+                    mode=[["lines", "lines"]],
                     color=[["red", "yellow"]]
                     )
     fig.show()
