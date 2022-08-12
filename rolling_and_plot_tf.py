@@ -379,6 +379,7 @@ def validate(model, dataloader, dev=True):
     visualize.reset_index(drop=True)
 
     visualize["point"] = list(range(1, len(visualize) + 1))
+    print("Percent Accuracy:", np.mean(100.0 - abs((np_aggregate - np_labels))/np_labels * 100))
 
     fig = data_plot(data=visualize,
                     x=[["point", "point"]],
