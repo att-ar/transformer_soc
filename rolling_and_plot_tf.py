@@ -347,16 +347,16 @@ def rolling_split(df, window_size, test_size=0.1, train=True):
 
 def validate(model, dataloader, dev=True):
     '''
-    pytorch model, pytorch DataLoader -> pd.DataFrame, prints 2 tensors and a Plotly plot
+    tensorflow model, tensorflow DataSet -> pd.DataFrame, prints 2 tensors and a Plotly plot
 
+    !! Tensorflow version, not the original PyTorch version
     This function runs a dataloader through the model and prints the max and min
     predicted SOC, it also prints a Plotly plot of the predictions versus the labels
     This function outputs a pandas.DataFrame of the predictions with their corresponding labels.
     '''
     pred = []
-    with torch.no_grad():
-        for x, y in dataloader:
-            pred.append(model(x))
+    for x, y in dataloader:
+        pred.append(model(x, training = False))
 
     aggregate = []
     for i in pred:  # this way is faster than list comprehension below
@@ -366,9 +366,9 @@ def validate(model, dataloader, dev=True):
     # aggregate = [unit for batch in pred for unit in batch]
     # print(max(aggregate), min(aggregate))
 
-    np_aggregate = np.array([p.detach().cpu().numpy() for p in aggregate])
-    np_labels = torch.clone(dataloader.dataset.labels).detach().cpu().numpy()[
-        :len(np_aggregate)]
+    np_aggregate = np.array([p.numpy() for p in aggregate])
+    np_labels = np.concatenate([label.numpy() for _, label in dataloader][
+        :len(np_aggregate)], axis = 0)
 
     visualize = pd.DataFrame(data={"pred": np_aggregate.squeeze(),
                                    "labels": np_labels.squeeze()})
