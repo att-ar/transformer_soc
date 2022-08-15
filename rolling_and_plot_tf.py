@@ -345,7 +345,7 @@ def rolling_split(df, window_size, test_size=0.1, train=True):
 # Validation
 
 
-def validate(model, dataloader, dev=True):
+def validate(model, dataloader, dev=True, method = "me"):
     '''
     tensorflow model, tensorflow DataSet -> pd.DataFrame, prints 2 tensors and a Plotly plot
 
@@ -353,24 +353,36 @@ def validate(model, dataloader, dev=True):
     This function runs a dataloader through the model and prints the max and min
     predicted SOC, it also prints a Plotly plot of the predictions versus the labels
     This function outputs a pandas.DataFrame of the predictions with their corresponding labels.
+    
+    Parameters:
+    `dev` bool
+        whether or not it's the developmental set
+        use False if it's the entire dataset
+    `method` str in ["me","tf"]
+        "me" uses pred as a list and appends predictions
+        "tf" uses model.predict()
     '''
-    pred = []
-    for x, y in dataloader:
-        pred.append(model(x, training = False))
+    assert(method in ["me","tf"])
 
-    aggregate = []
-    for i in pred:  # this way is faster than list comprehension below
-        aggregate.extend(i)
-    print(max(aggregate), min(aggregate))
+    if method == "me":
+        pred = []
+        for x, y in dataloader:
+            pred.append(model(x, training = False))
+        for i in pred:  # this way is faster than list comprehension below
+            aggregate.extend(i)
+        # aggregate = [unit for batch in pred for unit in batch]
+        print("Max pred: ", max(aggregate.numpy()), "\tMin pred: ", min(aggregate.numpy()))
 
-    # aggregate = [unit for batch in pred for unit in batch]
-    # print(max(aggregate), min(aggregate))
+        aggregate = np.array([p.numpy() for p in aggregate])
 
-    np_aggregate = np.array([p.numpy() for p in aggregate])
+    else: #method == "tf"
+        aggregate = model.predict(dataloader, verbose = 1)
+        print("Max pred: ", aggregate.max(), "\tMin pred: ", aggregate.min())
+
     np_labels = np.concatenate([label.numpy() for _, label in dataloader][
-        :len(np_aggregate)], axis = 0)
+        :len(aggregate)], axis = 0)
 
-    visualize = pd.DataFrame(data={"pred": np_aggregate.squeeze(),
+    visualize = pd.DataFrame(data={"pred": aggregate.squeeze(),
                                    "labels": np_labels.squeeze()})
     if dev:  # if it is the dev set, the values need to be sorted by value
         visualize.sort_values("labels", inplace=True)
@@ -379,7 +391,7 @@ def validate(model, dataloader, dev=True):
     visualize.reset_index(drop=True)
 
     visualize["point"] = list(range(1, len(visualize) + 1))
-    print("Percent Accuracy:", np.mean(100.0 - abs((np_aggregate - np_labels))/np_labels * 100))
+    print("Percent Accuracy:", np.mean(100.0 - abs((aggregate - np_labels))/np_labels * 100))
 
     fig = data_plot(data=visualize,
                     x=[["point", "point"]],
