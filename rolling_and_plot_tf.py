@@ -345,12 +345,12 @@ def rolling_split(df, window_size, test_size=0.1, train=True):
 # Validation
 
 
-def validate(model, dataloader, dev=True, method = "me"):
+def validate(model, dataloader, dev=True):
     '''
-    tensorflow model, tensorflow DataSet -> pd.DataFrame, prints 2 tensors and a Plotly plot
+    tensorflow model, tensorflow DataSet -> pd.DataFrame, prints 2 floats and a Plotly plot
 
     !! Tensorflow version, not the original PyTorch version
-    This function runs a dataloader through the model and prints the max and min
+    This function runs a td.data.Dataset through the model and prints the max and min
     predicted SOC, it also prints a Plotly plot of the predictions versus the labels
     This function outputs a pandas.DataFrame of the predictions with their corresponding labels.
     
@@ -358,26 +358,10 @@ def validate(model, dataloader, dev=True, method = "me"):
     `dev` bool
         whether or not it's the developmental set
         use False if it's the entire dataset
-    `method` str in ["me","tf"]
-        "me" uses pred as a list and appends predictions
-        "tf" uses model.predict()
     '''
-    assert(method in ["me","tf"])
 
-    if method == "me":
-        pred = []
-        for x, y in dataloader:
-            pred.append(model(x, training = False))
-        for i in pred:  # this way is faster than list comprehension below
-            aggregate.extend(i)
-        # aggregate = [unit for batch in pred for unit in batch]
-        print("Max pred: ", max(aggregate.numpy()), "\tMin pred: ", min(aggregate.numpy()))
-
-        aggregate = np.array([p.numpy() for p in aggregate])
-
-    else: #method == "tf"
-        aggregate = model.predict(dataloader, verbose = 1)
-        print("Max pred: ", aggregate.max(), "\tMin pred: ", aggregate.min())
+    aggregate = model.predict(dataloader, verbose = 1)
+    print("Max pred: ", aggregate.max(), "\tMin pred: ", aggregate.min())
 
     np_labels = np.concatenate([label.numpy() for _, label in dataloader][
         :len(aggregate)], axis = 0)
