@@ -1,6 +1,6 @@
 # Transformers + TensorFlow and Pandas for SOC Estimation
 
-**The other branches are more up to date**
+**The Testing branch is the most up to date**
 
 Building a transformer neural network using TensorFlow and Transformers in Python with the goal of prediciting Li-ion State of Charge based on real time voltage, current and delta time data.
 
