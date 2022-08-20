@@ -344,7 +344,6 @@ def rolling_split(df, window_size, test_size=0.1, train=True):
 # ----------------------------------------------------------------
 # Validation
 
-
 def validate(model, dataloader, dev=True):
     '''
     tensorflow model, tensorflow DataSet -> pd.DataFrame, prints 2 floats and a Plotly plot
@@ -359,8 +358,15 @@ def validate(model, dataloader, dev=True):
         whether or not it's the developmental set
         use False if it's the entire dataset
     '''
-
-    aggregate = model.predict(dataloader, verbose = 1)
+    pred = []
+    for x,y in dataloader:
+        soc, _ = model(x,y,training=False)
+        pred.append(soc.numpy())
+    
+    aggregate = []
+    for p in pred:
+        aggregate.extend(p)
+    aggregate = np.array(aggregate)
     print("Max pred: ", aggregate.max(), "\tMin pred: ", aggregate.min())
 
     np_labels = np.concatenate([label.numpy() for _, label in dataloader][
@@ -375,7 +381,7 @@ def validate(model, dataloader, dev=True):
     visualize.reset_index(drop=True)
 
     visualize["point"] = list(range(1, len(visualize) + 1))
-    print("Percent Accuracy:", np.mean(100.0 - abs((aggregate - np_labels))/np_labels * 100))
+    print("Percent Accuracy:", np.mean(100.0 - abs((aggregate - np_labels))/(np_labels+0.01) * 100))
 
     fig = data_plot(data=visualize,
                     x=[["point", "point"]],
