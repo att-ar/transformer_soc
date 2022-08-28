@@ -358,15 +358,8 @@ def validate(model, dataloader, dev=True):
         whether or not it's the developmental set
         use False if it's the entire dataset
     '''
-    pred = []
-    for x,y in dataloader:
-        soc, _ = model(x,y,training=False)
-        pred.append(soc.numpy())
     
-    aggregate = []
-    for p in pred:
-        aggregate.extend(p)
-    aggregate = np.array(aggregate)
+    aggregate = model.predict(dataloader, verbose = 1)
     print("Max pred: ", aggregate.max(), "\tMin pred: ", aggregate.min())
 
     np_labels = np.concatenate([label.numpy() for _, label in dataloader][
@@ -374,6 +367,7 @@ def validate(model, dataloader, dev=True):
 
     visualize = pd.DataFrame(data={"pred": aggregate.squeeze(),
                                    "labels": np_labels.squeeze()})
+    
     if dev:  # if it is the dev set, the values need to be sorted by value
         visualize.sort_values("labels", inplace=True)
     # if it is the entire dataset, it is already sorted chronologically which is more important
