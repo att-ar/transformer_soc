@@ -2,6 +2,8 @@
 
 **The Testing branch is the most up to date**
 
+Repo with the Decoder implemented: [Attar's Github Repo](https://github.com/att-ar/transform_decode_soc)
+
 Building a transformer neural network using TensorFlow and Transformers in Python with the goal of prediciting Li-ion State of Charge based on real time voltage, current and delta time data.
 
 This transformer is composed of only the encoder layer, and it uses Batch Normalization instead of the Layer Normalization found in NLP.
