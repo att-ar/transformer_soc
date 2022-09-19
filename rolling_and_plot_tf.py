@@ -242,21 +242,20 @@ def data_plot(data=None, x=None, y=None,
 
 # -------------------------------------------------------
 
-def normalize(data: pd.DataFrame):
+def normalize(data: pd.DataFrame, capacity: float):
     '''
     pd.DataFrame -> pd.DataFrame
     Precondition: "delta t" is removed from the DataFrame
 
     Normalizes the data by applying sklearn.preprocessing functions
     Voltage is scaled between 0 and 1;
-    Current is scaled between -1 and 1;
+    Current is scaled to become C-rate
     SOC is scaled between 0 and 1 (just divided by 100)
 
     Output:
         normalized pd.DataFrame
     '''
-    data["current"] = MaxAbsScaler().fit_transform(
-        data["current"].values.reshape(-1, 1))
+    data["current"] /= capacity
     data["voltage"] = MinMaxScaler((0, 1)).fit_transform(
         data["voltage"].values.reshape(-1, 1))
     data["soc"] /= 100.
